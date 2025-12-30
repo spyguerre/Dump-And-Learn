@@ -38,6 +38,7 @@ function removeAccents(str: string): string {
 
 export default function ReviewPage() {
   const router = useRouter();
+  
   const [queue, setQueue] = useState<WordItem[]>([]);
   const [nextCycle, setNextCycle] = useState<WordItem[]>([]);
   const [loading, setLoading] = useState(true);

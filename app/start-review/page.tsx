@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type ReviewSettings = {
   wordCount: string;
@@ -20,13 +21,13 @@ const DEFAULT_SETTINGS: ReviewSettings = {
 };
 
 export default function StartReview() {
+  const router = useRouter();
+  
   const [settings, setSettings] = useState<ReviewSettings>(DEFAULT_SETTINGS);
   const [customWordCount, setCustomWordCount] = useState("");
   const [customMargin, setCustomMargin] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [words, setWords] = useState<Array<any>>([]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -53,34 +54,6 @@ export default function StartReview() {
     setSettings(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
-
-  const startReviewClick = async () => {
-    setError(null);
-    setLoading(true);
-    setWords([]);
-    try {
-    const res = await fetch(`/api/review`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-      wordCount: settings.wordCount,
-      reviewMode: settings.reviewMode,
-      priorityMode: settings.priorityMode,
-      marginOfError: settings.marginOfError,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data?.error || `HTTP ${res.status}`);
-    } else {
-      setWords(data.words || []);
-    }
-    } catch (err: any) {
-      setError(err?.message || String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   if (!isLoaded) return null; // Prevent hydration mismatch
 
@@ -255,13 +228,12 @@ export default function StartReview() {
         {/* Start Button */}
         <div className="mt-6">
           <button
-            onClick={ startReviewClick }
+            onClick={ () => {setLoading(true); router.push("/review")} }
             className="w-full px-6 py-3 rounded font-medium bg-blue-600 text-white"
             disabled={loading}
           >
             {loading ? "Loading..." : "Start Review"}
           </button>
-          {error && <div className="mt-3 text-sm text-red-400">{error}</div>}
         </div>
       </main>
     </div>
