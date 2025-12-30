@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* Default: global dark theme */
+:root {
+  --background: #0a0a0a;
+  --foreground: #e6e6e6;
+  --muted: #9ca3af;
+  --accent: #2563eb;
+  --card: #0f1720;
+  --border: #1f2937;
+
+  /* button */
+  --button-bg: var(--accent);
+  --button-fg: #ffffff;
+  --button-bg-hover: #1d4ed8;
+}
+
+/* Light theme override when explicitly requested */
+[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --card: #ffffff;
+  --border: #e5e7eb;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Basic element styles to match dark theme */
+button {
+  background: var(--button-bg);
+  color: var(--button-fg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+button.secondary {
+  background: var(--background);
+  color: var(--button-fg);
+  opacity: 0.5;
+}
+
+input,
+textarea,
+select {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+.card {
+  background: var(--card);
+  color: var(--foreground);
+}
