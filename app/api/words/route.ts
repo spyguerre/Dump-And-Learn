@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     );
 
     const stmt = db.prepare('INSERT INTO words (native, "foreign", description, timestamp) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(nativeWord, foreignWord, description, Math.floor(Date.now() / 1000));
+    const info = stmt.run(nativeWord, foreignWord, description, Math.floor(Date.now()));
     db.close();
 
     return NextResponse.json({ id: info.lastInsertRowid, nativeWord: nativeWord, foreignWord: foreignWord, description: description });

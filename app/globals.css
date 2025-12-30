@@ -45,6 +45,21 @@ button.secondary {
   opacity: 0.5;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  background: var(--background);
+  color: var(--button-fg);
+  opacity: 0.5;
+}
+
+input.correct-answer {
+  background: #66db38;
+}
+
+input.wrong-answer {
+  background: #b83d3d;
+}
+
 input,
 textarea,
 select {
@@ -58,7 +73,6 @@ input::placeholder {
   color: var(--muted);
 }
 
-.card {
-  background: var(--card);
-  color: var(--foreground);
+*[readOnly] {
+  cursor: not-allowed;
 }

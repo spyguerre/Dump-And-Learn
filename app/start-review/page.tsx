@@ -84,11 +84,6 @@ export default function StartReview() {
 
   if (!isLoaded) return null; // Prevent hydration mismatch
 
-  const wordCountValue =
-    settings.wordCount === "custom"
-      ? settings.wordCount
-      : Number(settings.wordCount);
-
   return (
     <div className="flex min-h-screen items-center justify-center font-sans">
       <main className="w-full max-w-2xl p-8 shadow rounded">
