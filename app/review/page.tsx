@@ -53,48 +53,61 @@ export default function ReviewPage() {
   const foreignInputRef = useRef<HTMLInputElement>(null);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
+  let current: WordItem;
+
   // load settings from localStorage and fetch words
   useEffect(() => {
-    const stored = localStorage.getItem("reviewSettings");
-    let settings: any = null;
-    try {
-      settings = stored ? JSON.parse(stored) : null;
-    } catch (e) {
-      settings = null;
+    if (!settingsLoaded) {
+      const stored = localStorage.getItem("reviewSettings");
+      let settings: any = null;
+      try {
+        settings = stored ? JSON.parse(stored) : null;
+      } catch (e) {
+        settings = null;
+      }
+
+      async function fetchWords() {
+        setLoading(true);
+        setError(null);
+        try {
+          const res = await fetch("/api/review", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              wordCount: settings?.wordCount ?? 10,
+              reviewMode: settings?.reviewMode ?? "both",
+              priorityMode: settings?.priorityMode ?? "random",
+              marginOfError: settings?.marginOfError ?? 1,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data?.error || `HTTP ${res.status}`);
+          }
+          // initialize queue
+          setQueue(data.words || []);
+          setNextCycle([]);
+          setCurrentIndex(0);
+        } catch (err: any) {
+          setError(err?.message || String(err));
+        } finally {
+          setLoading(false);
+          setSettingsLoaded(true);
+        }
+      }
+
+      fetchWords();
     }
 
-    async function fetchWords() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/review", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            wordCount: settings?.wordCount ?? 10,
-            reviewMode: settings?.reviewMode ?? "both",
-            priorityMode: settings?.priorityMode ?? "random",
-            marginOfError: settings?.marginOfError ?? 1,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data?.error || `HTTP ${res.status}`);
-        }
-        // initialize queue
-        setQueue(data.words || []);
-        setNextCycle([]);
-        setCurrentIndex(0);
-      } catch (err: any) {
-        setError(err?.message || String(err));
-      } finally {
-        setLoading(false);
-        setSettingsLoaded(true);
+    if (current) {
+      if (current.askIn === "native") {
+        nativeInputRef.current?.focus();
+      } else {
+        foreignInputRef.current?.focus();
       }
     }
 
-    fetchWords();
-  }, []);
+  }, [feedback]); // update at every feedback change to ensure good focus
 
   // helper to post review attempt to server
   async function postReview(wordId: number, success: 0 | 1, askIn: "native" | "foreign") {
@@ -218,7 +231,7 @@ export default function ReviewPage() {
   if (error) return <div className="p-8 text-red-400">Error: {error}</div>;
   if (queue.length === 0) return <div className="p-8">No words to review.</div>;
 
-  const current = queue[currentIndex];
+  current = queue[currentIndex];
   const prompt = current.askIn === "native" ? current.native : current.foreign;
 
   return (
@@ -229,23 +242,25 @@ export default function ReviewPage() {
           <div className="text-sm opacity-80">{currentIndex + 1} / {queue.length} (next cycle: {nextCycle.length})</div>
         </div>
 
-        <div ref={nativeInputRef}>
+        <div>
           <TextInput
             langType="native"
             askIn={current.askIn}
             value={current.askIn === "native" ? answerValue : prompt}
             feedback={feedback}
+            ref={nativeInputRef}
             onChange={setAnswerValue}
             onEnter={handleConfirm}
           />
         </div>
 
-        <div ref={foreignInputRef}>
+        <div>
           <TextInput
             langType="foreign"
             askIn={current.askIn}
             value={current.askIn === "foreign" ? answerValue : prompt}
             feedback={feedback}
+            ref={foreignInputRef}
             onChange={setAnswerValue}
             onEnter={handleConfirm}
           />
